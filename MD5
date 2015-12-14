@@ -1,0 +1,12 @@
+8d798804c823da086566da56fde4638d *DESCRIPTION
+e883608fbf776e4e4b2fdca383b89aa1 *NAMESPACE
+e722d859009b2a8f9f2a0efcf11c9c89 *R/desplot.r
+e3e0aad55730d43d6d305f6f6742931a *build/vignette.rds
+b76204a4bc7d680cdcee6a8999c987f7 *inst/doc/desplot.R
+1287160908ad6857f3130195aab4f4c5 *inst/doc/desplot.Rmd
+37e3d8b677714ec11b505f449273ac38 *inst/doc/desplot.html
+67975fe32841aa7b918d67e343b3b3cd *man/RedGrayBlue.Rd
+d5b445b2c7e79e0e2fa67490f2e8c7d6 *man/desplot.Rd
+9c560471b25684c0ac53edce9e4e6d4c *man/panel.outlinelevelplot.Rd
+1287160908ad6857f3130195aab4f4c5 *vignettes/desplot.Rmd
+f858ee640ce2df4630ef7779f51953f2 *vignettes/desplot.bib
