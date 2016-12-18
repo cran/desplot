@@ -1,8 +1,10 @@
 # desplot.r
-# Time-stamp: <10 Dec 2015 15:33:52 c:/x/rpack/desplot/R/desplot.r>
+# Time-stamp: <17 Dec 2016 21:00:05 c:/x/rpack/desplot/R/desplot.r>
 # Kevin Wright
 
 # TODO: If we have 'text' and shorten='no', don't bother with the key.
+
+# ----------------------------------------------------------------------------
 
 #' Function to create a Red-Gray-Blue palette
 #'
@@ -11,24 +13,17 @@
 #' Using gray instead of white allows missing values to appear as white
 #' (actually, transparent).
 #'
-#' The 'coolwarm' palette by Kenneth Mooreland came later and added a bit
-#' more color to the red and blue, and reversed the scale.
-#'
 #' @param n Number of colors to create
 #' @return A vector of n colors.
 #' @author Kevin Wright
-#' @references
-#' Kenneth Moreland. (2009).
-#' "Diverging Color Maps for Scientific Visualization."
-#' In Proceedings of the 5th International Symposium on Visual Computing.
-#' December 2009.
-#' \url{http://kennethmoreland.com/color-maps/}
 #'
 #' @examples
 #' pie(rep(1,11), col=RedGrayBlue(11))
 #' title("RedGrayBlue(11)")
 #' @export
 RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
+
+# ----------------------------------------------------------------------------
 
 #' Plot the layout/data of a field experiment.
 #'
@@ -51,67 +46,117 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' \emph{numeric}, the cells are colored according to \code{col.regions}, and
 #' a ribbon key is placed on the right.
 #' 
-#' The default \code{shorten='abb'} will shorten the cell text using the
-#' \code{abbreviate} function. Other choices include \code{shorten='sub'} to
-#' use a 3-character substring, and \code{shorten='no'} for no shortening.
+#' The default argument \code{shorten='abb'} will shorten the cell text using
+#' the \code{abbreviate} function.
+#' Use \code{shorten='sub'} to use a 3-character substring.
+#' Use \code{shorten='no'} or \code{shorten=FALSE} for no shortening.
 #' 
 #' Note that two sub-plots with identical levels of the split-plot factor can
 #' be adjacent to each other by virtue of appearing in different whole-plots.
 #' To correctly outline the split-plot factor, simply concatenate the
 #' whole-plot factor and sub-plot factor together.
+#'
+#' To get a map of a field with a true aspect ratio, include 'aspect=ylen/xlen'
+#' in the call, where 'ylen' is the vertical length of the field and 'xlen'
+#' is the horizontal length of the field.
 #' 
 #' To call this function inside another function, you can hack like this:
 #' vr <- "yield"; vx <- "x"; vy <- "y";
 #' eval(parse(text=paste("desplot(", vr, "~", vx, "*", vy, ", data=yates.oats)")))
 #' 
-#' @param form A formula like \code{yield~x*y|location}
-#' @param data A data frame
-#' @param num The column of the data to use for plotting numbers
-#' @param col Column of the data for the color of the number
-#' @param text Column to use for text labels
-#' @param out1 Column to use for outlining
-#' @param out2 Column to use for outlining
-#' @param col.regions Colors for regions
-#' @param col.text Colors for text strings
-#' @param text.levels Character strings to use instead of default 'levels'
-#' @param out1.gpar A list of graphics parameters for outlining.  Can either be an ordinary \code{list()} or A call to \code{gpar()} from the \code{grid} package.
-#' @param out2.gpar Second level of outlining.
-#' @param at Breakpoints for the color ribbon
-#' @param ticks If TRUE, show tick marks row/column
-#' @param flip If TRUE, vertically flip the image
-#' @param main Main title
-#' @param xlab Label for x axis
-#' @param ylab Label for y axis
-#' @param shorten Method for shortening text in the key
-#' @param show.key If TRUE, show the key
-#' @param key.cex Left legend cex
-#' @param cex Expansion factor for text/number in each cellExpansion factor for text/number in each cell
-#' @param strip.cex Strip cex
-#' @param ... Other
+#' @param form A formula like \code{yield~x*y|location}. Note x,y are numeric.
+#'
+#' @param data A data frame.
+#' 
+#' @param num The name of the column of the data to use for plotting numbers.
+#' 
+#' @param col Column of the data for the color of the number shown in each cell.
+#' 
+#' @param text Column of the data to use for text labels shown in each cell.
+#' 
+#' @param out1 Column of the data to use for outlining around blocks of cells.
+#' 
+#' @param out2 Column of the data to use for outlining around blocks of cells.
+#' 
+#' @param col.regions Colors for the fill color of cells.
+#' 
+#' @param col.text Colors for text strings.
+#' 
+#' @param text.levels Character strings to use instead of default 'levels'.
+#' 
+#' @param out1.gpar A list of graphics parameters for outlining.  Can either
+#'   be an ordinary \code{list()} or A call to \code{gpar()} from the
+#'   \code{grid} package.
+#' 
+#' @param out2.gpar Graphics parameters for the second level of outlining.
+#' 
+#' @param at Breakpoints for the color ribbon.  Use this instead of 'zlim'.
+#' Note: using at causes midpoint to be set to NULL.
+#'
+#' @param midpoint Method to find midpoint of the color ribbon.
+#' One of 'mid', 'median, or numeric value.
+#' 
+#' @param ticks If TRUE, show tick marks along the bottom and left sides.
+#' 
+#' @param flip If TRUE, vertically flip the image.
+#' 
+#' @param main Main title.
+#' 
+#' @param xlab Label for x axis.
+#' 
+#' @param ylab Label for y axis.
+#' 
+#' @param shorten Method for shortening text in the key, either 'abb', 'sub', 'no', or FALSE.
+#' 
+#' @param show.key If TRUE, show the key on the left side. (This is not the ribbon.)
+#' 
+#' @param key.cex Left legend cex.
+#'
+#' @param cex Expansion factor for text/number in each cell.
+#' 
+#' @param strip.cex Strip cex.
+#' 
+#' @param ... Other.
+#' 
 #' @return A lattice object
+#' 
 #' @author Kevin Wright
+#' 
 #' @references
+#' 
 #' K. Ryder (1981). Field plans: why the biometrician finds them useful.
 #' \emph{Experimental Agriculture}, 17, 243--256.
+#' 
 #' @import grid
 #' @import lattice
 #' @import reshape2
-#' @importFrom stats as.formula formula
-#' @export 
+#' @importFrom stats as.formula formula median
+#' @export
+#' 
 #' @examples
 #' if(require(agridat)){
+#' 
 #' # Show how to customize any feature.  Here: make the strips bigger.
-#' data(besag.met)
-#' d1 <- desplot(yield ~ col*row|county, besag.met, main="besag.met",
-#'               out1=rep, out2=block, out2.gpar=list(col="white"), strip.cex=3)
+#' if(exists("besag.met")) { # in agridat version <= 1.12
+#'   data(besag.met)
+#'   dat <- besag.met
+#' } else {
+#'   data(besag.corn) # in agridat version >= 1.13
+#'   dat <- besag.corn
+#' }
+#' d1 <- desplot(yield ~ col*row|county, dat, main="besag.corn",
+#'               out1=rep, out2=block, out2.gpar=list(col="white"), strip.cex=2)
 #' d1 <- update(d1, par.settings = list(layout.heights=list(strip=2)))
 #' print(d1)
 #' 
 #' # Show experiment layout
 #' data(yates.oats)
-#' desplot(yield ~ x+y, yates.oats, out1=block, out2=gen)
+#' # agridat version 1.12 used x/y here instead of col/row
+#' if(is.element("x",names(yates.oats)))
+#'   yates.oats <- transform(yates.oats, col=x, row=y)
+#' desplot(yield ~ col+row, yates.oats, out1=block, out2=gen)
 #' 
-#' desplot(block ~ x+y, yates.oats, col=nitro, text=gen, cex=1, out1=block,
+#' desplot(block ~ col+row, yates.oats, col=nitro, text=gen, cex=1, out1=block,
 #'         out2=gen, out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
 #' 
 #'   
@@ -130,7 +175,8 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                     col.regions=RedGrayBlue, col.text=NULL, text.levels=NULL,
                     out1.gpar=list(col="black", lwd=3),
                     out2.gpar=list(col="yellow", lwd=1, lty=1),
-                    at, ticks=FALSE, flip=FALSE,
+                    at, midpoint="median",
+                    ticks=FALSE, flip=FALSE,
                     main=NULL, xlab, ylab,
                     shorten='abb',
                     show.key=TRUE,
@@ -138,6 +184,14 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                     cex=.4, # cell cex
                     strip.cex=.75, ...){
 
+  # Using 'at' overrides 'midpoint'
+  if(!missing(at) && !is.null(midpoint))
+    midpoint <- NULL
+
+  if(!missing(at) && is.vector(col.regions) &&
+       ( length(at) !=  length(col.regions)+1 ) )
+    stop("Length of 'at' must be 1 more than length of 'col.regions'\n")
+  
   # Use data name for default title
   if(missing(main)) main <- deparse(substitute(data))
 
@@ -150,7 +204,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
 
     if(!is.character(x)) x <- deparse(x)
     if(!is.element(x, dn))
-      stop("Couldn't find '", x,"' in the data frame.")
+      stop("Could not find '", x,"' in the data frame.")
     return(x)
   }
   num.var <- cleanup(substitute(num), dn)
@@ -164,7 +218,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
   has.text <- !is.null(text.var)
   has.out1 <- !is.null(out1.var)
   has.out2 <- !is.null(out2.var)
-  if(has.num & has.text) stop("Specify either 'num' or 'text'")
+  if(has.num & has.text) stop("Specify either 'num' or 'text'. Not both.")
 
   data <- droplevels(data) # In case the user called with subset(obj, ...)
 
@@ -217,8 +271,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
    if(fill.type=="none") {
     col.regions <- "transparent"
     at <- c(0.5,1.5)
-  }
-  else if(fill.type=="factor"){
+  } else if(fill.type=="factor"){
     # If col.regions is a function, switch to default fill colors
     if(is.function(col.regions))
       col.regions <- c("#E6E6E6","#FFD9D9","#FFB2B2","#FFD7B2","#FDFFB2",
@@ -229,24 +282,61 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                        "#9FFF40","#C9CC3D")
     col.regions <- rep(col.regions, length=fill.n)
     at <- c((0:fill.n)+.5)
-  }
-  else if(fill.type=="num") {
-    # col.regions can be either a function, or vector.  Make it a vector.
-    zrng <- lel(range(as.numeric(fill.val), finite = TRUE))
-    if(is.function(col.regions)) {
-      # if 'at' is not given, use 16 break points (15 colors)
-      if(missing(at)) at <- seq(zrng[1], zrng[2], length.out = 16)
-      col.regions <- col.regions(length(at)-1)
-    } else {
-      nbins <- length(col.regions)
-      if(missing(at)) {
-        at <- seq(zrng[1], zrng[2], length.out = nbins + 1)
-      } else {
-        if(nbins != length(at)-1) stop("Length of 'at' must be 1 more than length of 'col.regions'\n")
-      }
+  } else if(fill.type=="num") {
+    if(missing(at) && is.null(midpoint)){
+        nbins <- 15
+        if(is.function(col.regions)) col.regions <- col.regions(nbins)
+        # Use lel = lattice:::extend.limits to move breakpoints past ends of fill.val
+        zrng <- lel(range(as.numeric(fill.val), finite = TRUE))
+        at <- seq(zrng[1], zrng[2], length.out = 16)
     }
-  }
-
+    if(missing(at) && midpoint=="median"){ # default case for continuous data
+      if(is.function(col.regions)) {
+        nbins <- 15
+        col.regions <- col.regions(nbins)
+      } else {
+        nbins <- length(col.regions)
+      }
+      #browser()
+      med <- median(fill.val, na.rm=TRUE)
+      radius <- max(max(fill.val, na.rm=TRUE)-med,
+                    med-min(fill.val, na.rm=TRUE)) + .Machine$double.eps
+      zrng <- lel(range(c(med-radius, med+radius)))
+      brks <- seq(zrng[1], zrng[2], length.out = nbins+1)
+      binno <- as.numeric(cut(fill.val, breaks=brks)) # bin number for each fill.val
+      # select only 'col.regions' and 'at' values we actually need
+      minbin <- min(binno, na.rm=TRUE); maxbin <- max(binno, na.rm=TRUE)
+      col.regions <- col.regions[minbin:maxbin]
+      at <- brks[minbin:(maxbin+1)]
+    }
+    if(missing(at) && is.numeric(midpoint)){
+      if(is.function(col.regions)) {
+        nbins <- 15
+        col.regions <- col.regions(nbins)
+      } else {
+        nbins <- length(col.regions)
+      }
+      radius <- max(max(fill.val, na.rm=TRUE)-midpoint,
+                    midpoint-min(fill.val, na.rm=TRUE)) + .Machine$double.eps
+      zrng <- lel(range(c(midpoint-radius, midpoint+radius)))
+      brks <- seq(zrng[1], zrng[2], length.out = nbins+1)
+      binno <- as.numeric(cut(fill.val, breaks=brks)) # bin number for each fill.val
+      # select only col.regions and at we actually need
+      minbin <- min(binno, na.rm=TRUE); maxbin <- max(binno, na.rm=TRUE)
+      col.regions <- col.regions[minbin:maxbin]
+      at <- brks[minbin:(maxbin+1)]
+    }
+    if(!missing(at)){
+      # user specified 'at' and 'col.regions'
+      nbins <- length(at)-1
+      if(is.function(col.regions)) col.regions <- col.regions(nbins)
+    }
+    
+  } # end fill.type
+  # comment: the Fields package defines breakpoints so that the first and last
+  # bins have their midpoints at the minimum and maximum values in z
+  # https://www.image.ucar.edu/~nychka/Fields/Help/image.plot.html
+  
   # Text colors
   if(is.null(col.text))
     col.text <- c("black", "red3", "darkorange2", "chartreuse4",
@@ -307,7 +397,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
   }
 
   if(has.text) { # text
-    text.val <- factor(data[[text.var]]) # in case not factor
+    text.val <- factor(data[[text.var]]) # In case it is not a factor
     lt.text <- levels(text.val)
     text.n <- length(lt.text)
     lr <- lr + 2 + text.n
@@ -316,7 +406,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
 
   # Set up short version of text
   if(has.text & is.null(text.levels)){
-    if(shorten=='no' | shorten=='none')
+    if(shorten=='no' | shorten=='none' | (is.logical(shorten) && !shorten))
       text.levels <- lt.text
     else if (shorten=='abb')
       text.levels <- abbreviate(lt.text, 2, method='both')
@@ -534,111 +624,124 @@ prepanel.desplot <- function (x, y, subscripts, flip, ...) {
 #' The code works, but is probably overkill and has not been streamlined.
 #' 
 #' @param x Coordinates
+#' 
 #' @param y Coordinates
-#' @param z Value for filling each cell
-#' @param subscripts For compatability
-#' @param at Breakpoints for the colors
+#' 
+#' @param z Value for filling each cell.
+#' 
+#' @param subscripts For compatability.
+#' 
+#' @param at Breakpoints for the colors.
+#' 
 #' @param ... Other
+#' 
 #' @param alpha.regions Transparency for fill colors. Not well tested.
+#' 
 #' @param out1f Factors to use for outlining.
+#' 
 #' @param out1g Factors to use for outlining.
+#' 
 #' @param out2f Graphics parameters to use for outlining.
+#' 
 #' @param out2g Graphics parameters to use for outlining.
+#' 
 #' @export 
 #' @references
 #' Derived from lattice::panel.levelplot
-panel.outlinelevelplot <- function(x, y, z, subscripts, at, ...,
-           alpha.regions = 1, out1f, out1g, out2f, out2g) {
-    dots=list(...)
-    col.regions=dots$col.regions
+panel.outlinelevelplot <- function(x, y, z, subscripts, at,
+                                   ...,
+                                   alpha.regions = 1,
+                                   out1f, out1g, out2f, out2g) {
+  dots=list(...)
+  col.regions=dots$col.regions
   # Based on panel.levelplot
+  
+  # parent function forces x,y to be numeric, not factors
+  
+  if (length(subscripts) == 0L) return()
+  
+  z <- as.numeric(z)
+  zcol <- level.colors(z, at, col.regions, colors = TRUE)
+  x <- x[subscripts]
+  y <- y[subscripts]
+  
+  zlim <- range(z, finite = TRUE)
+  z <- z[subscripts]
+  zcol <- zcol[subscripts]
+  
+  ux <- sort(unique(x[!is.na(x)]))
+  bx <- if (length(ux) > 1L) { # breakpoints
+    c(3 * ux[1] - ux[2], ux[-length(ux)] + ux[-1],
+      3 * ux[length(ux)] - ux[length(ux) - 1])/2
+  } else ux + c(-0.5, 0.5)
+  lx <- diff(bx) # lengths? I think this is same as rep(1, length(ux))
+  cx <- (bx[-1] + bx[-length(bx)])/2  # centers
+  
+  uy <- sort(unique(y[!is.na(y)]))
+  by <- if (length(uy) > 1) {
+    c(3 * uy[1] - uy[2], uy[-length(uy)] + uy[-1],
+      3 * uy[length(uy)] - uy[length(uy) - 1])/2
+  } else uy + c(-0.5, 0.5)
+  ly <- diff(by)
+  cy <- (by[-1] + by[-length(by)])/2
+  
+  idx <- match(x, ux)
+  idy <- match(y, uy)
+  
+  # Fill the cells
+  grid.rect(x = cx[idx], y = cy[idy],
+            width=lx[idx],
+            height = ly[idy],
+            default.units = "native",
+            gp = gpar(fill = zcol, lwd = 1e-05, col="transparent",
+                      alpha = alpha.regions))
+  
+  draw.outline <- function(x, y, lab, gp) {
+    # x,y are coords, lab=grouping for outline, gp=graphics par
+    out1 <- data.frame(x=x, y=y, lab=lab, stringsAsFactors = FALSE)
+    out1 <- reshape2::melt(out1, id.var=c('x','y'))
+    # reshape melts char vector to char, reshape 2 melts to factor!
+    # both packages could be attached, hack to fix this...
+    out1$value <- as.character(out1$value)
     
-    # parent function forces x,y to be numeric, not factors
-
-    if (length(subscripts) == 0L) return()
-
-    z <- as.numeric(z)
-    zcol <- level.colors(z, at, col.regions, colors = TRUE)
-    x <- x[subscripts]
-    y <- y[subscripts]
-
-    zlim <- range(z, finite = TRUE)
-    z <- z[subscripts]
-    zcol <- zcol[subscripts]
-
-    ux <- sort(unique(x[!is.na(x)]))
-    bx <- if (length(ux) > 1L) { # breakpoints
-      c(3 * ux[1] - ux[2], ux[-length(ux)] + ux[-1],
-        3 * ux[length(ux)] - ux[length(ux) - 1])/2
-    } else ux + c(-0.5, 0.5)
-    lx <- diff(bx) # lengths? I think this is same as rep(1, length(ux))
-    cx <- (bx[-1] + bx[-length(bx)])/2  # centers
-
-    uy <- sort(unique(y[!is.na(y)]))
-    by <- if (length(uy) > 1) {
-      c(3 * uy[1] - uy[2], uy[-length(uy)] + uy[-1],
-        3 * uy[length(uy)] - uy[length(uy) - 1])/2
-    } else uy + c(-0.5, 0.5)
-    ly <- diff(by)
-    cy <- (by[-1] + by[-length(by)])/2
-
-    idx <- match(x, ux)
-    idy <- match(y, uy)
-
-    # Fill the cells
-    grid.rect(x = cx[idx], y = cy[idy],
-              width=lx[idx],
-              height = ly[idy],
-              default.units = "native",
-              gp = gpar(fill = zcol, lwd = 1e-05, col="transparent",
-                alpha = alpha.regions))
-
-    draw.outline <- function(x, y, lab, gp) {
-      # x,y are coords, lab=grouping for outline, gp=graphics par
-      out1 <- data.frame(x=x, y=y, lab=lab, stringsAsFactors = FALSE)
-      out1 <- reshape2::melt(out1, id.var=c('x','y'))
-      # reshape melts char vector to char, reshape 2 melts to factor!
-      # both packages could be attached, hack to fix this...
-      out1$value <- as.character(out1$value)
-
-      out1 <- reshape2::acast(out1, y~x)
-      # Careful.  The 'out' matrix is upside down from the levelplot
-
-      # Since 'out' could be 1 row or column, surround it with NAs
-      out1 <- cbind(NA, rbind(NA, out1, NA), NA)
-
-      # Horizontal lines above boxes
-      hor <- out1[2:nrow(out1)-1, ] != out1[2:nrow(out1), ]
-      hor <- reshape2::melt(hor)
-      hor <- hor[!(hor$value==FALSE | is.na(hor$value)),]
-      if(nrow(hor)>0) {
-        hx <- hor[,2] # reshape uses X2, reshape2 uses Var2
-        hy <- hor[,1]
-        grid.polyline(x=c(hx-.5, hx+.5), y=c(hy+.5, hy+.5),
-                      id=rep(1:length(hx), 2), default.units="native", gp=gp)
-      }
-      # Vertical lines along right side of boxes
-      vert <- out1[ , 2:ncol(out1)-1] != out1[ , 2:ncol(out1)]
-      vert <- reshape2::melt(vert)
-      vert <- vert[!(vert$value==FALSE | is.na(vert$value)),]
-      if(nrow(vert)>0) {
-        vx <- vert[,2]
-        vy <- vert[,1]
-        grid.polyline(x=c(vx+.5, vx+.5), y=c(vy-.5, vy+.5),
-                      id=rep(1:length(vx), 2), default.units="native", gp=gp)
-      }
-
+    out1 <- reshape2::acast(out1, y~x)
+    # Careful.  The 'out' matrix is upside down from the levelplot
+    
+    # Since 'out' could be 1 row or column, surround it with NAs
+    out1 <- cbind(NA, rbind(NA, out1, NA), NA)
+    
+    # Horizontal lines above boxes
+    hor <- out1[2:nrow(out1)-1, ] != out1[2:nrow(out1), ]
+    hor <- reshape2::melt(hor)
+    hor <- hor[!(hor$value==FALSE | is.na(hor$value)),]
+    if(nrow(hor)>0) {
+      hx <- hor[,2] # reshape uses X2, reshape2 uses Var2
+      hy <- hor[,1]
+      grid.polyline(x=c(hx-.5, hx+.5), y=c(hy+.5, hy+.5),
+                    id=rep(1:length(hx), 2), default.units="native", gp=gp)
     }
-
-    # Outline factor 1
-    if(!is.null(out1f))
-      draw.outline(x, y, as.character(out1f[subscripts]), out1g)
-
-    # Outline factor 2
-    if(!is.null(out2f))
-      draw.outline(x, y, as.character(out2f[subscripts]), out2g)
-
-    return()
+    # Vertical lines along right side of boxes
+    vert <- out1[ , 2:ncol(out1)-1] != out1[ , 2:ncol(out1)]
+    vert <- reshape2::melt(vert)
+    vert <- vert[!(vert$value==FALSE | is.na(vert$value)),]
+    if(nrow(vert)>0) {
+      vx <- vert[,2]
+      vy <- vert[,1]
+      grid.polyline(x=c(vx+.5, vx+.5), y=c(vy-.5, vy+.5),
+                    id=rep(1:length(vx), 2), default.units="native", gp=gp)
+    }
+    
+  }
+  
+  # Outline factor 1
+  if(!is.null(out1f))
+    draw.outline(x, y, as.character(out1f[subscripts]), out1g)
+  
+  # Outline factor 2
+  if(!is.null(out2f))
+    draw.outline(x, y, as.character(out2f[subscripts]), out2g)
+  
+  return()
 }
 
 .addLevels <- function(dat, xvar='x', yvar='y', locvar=NULL){
@@ -691,7 +794,7 @@ panel.outlinelevelplot <- function(x, y, z, subscripts, at, ...,
 }
 
 # lel is a very simple version of lattice:::extend.limits
-# Copied here because CRAN does not like ::: anymore as of 8.25.13
+# Copied here because CRAN does not like ::: anymore 
 lel <- function (lim, prop = lattice.getOption("axis.padding")$numeric) {
 
   if (lim[1] == lim[2])
@@ -702,124 +805,3 @@ lel <- function (lim, prop = lattice.getOption("axis.padding")$numeric) {
   }
 }
 
-# ----------------------------------------------------------------------------
-if(FALSE){
-  dd <- data.frame(loc = c('loc1','loc1','loc1','loc1','loc2','loc2','loc2','loc2','loc2','loc2'),
-                   x=c(1,2,1,2, 1,2,3,1,2,3),
-                   y=c(1,1,2,2, 1,1,1,2,2,2),
-                   rep=c('R1','R1','R2','R2',' R1','R2','R3','R1','R2','R3'),
-                   yield=c(9.29, 11.20, 9.36, 9.89, 8.47, 9.17, 8.86, 10.48, 10.22, 11.29),
-                   trt1=c('Treat1','Treat2','Treat2','Treat1','Trt1','Trt2','Trt1','Trt2','Trt1','Trt2'),
-                   trt2=c('Hybrid1','Hybrid1','Hybrid2','Hybrid2','Hybrid1',
-                     'Hybrid2','Hybrid3','Hybrid1','Hybrid2','Hybrid3'))
-  windows(width=3, height=2)
-  desplot(yield ~ x+y|loc, data=dd)
-  desplot(yield ~ x+y|loc, data=dd, strip.cex=1.5)
-  desplot(yield ~ x+y|loc, data=dd, col.regions=terrain.colors)
-
-  desplot( ~ x+y|loc, data=dd, num=trt1, cex=1) # err
-  desplot( ~ x+y|loc, data=dd, col=trt1, cex=1)
-  desplot( ~ x+y|loc, data=dd, text=trt1, cex=.8)
-
-  desplot( ~ x+y|loc, data=dd, text=trt1, cex=.8, shorten='none')
-  desplot( ~ x+y|loc, data=dd, text=trt1, cex=.8, shorten='none', key.cex=.5)
-  desplot( ~ x+y|loc, data=dd, text=trt1, cex=.8, shorten='none', show.key=FALSE)
-  desplot( ~ x+y|loc, data=dd, text=trt2, col=trt1, cex=1,
-        col.text=c('red','black','blue','plum'), text.levels=c('A','B','C'))
-
-  desplot(rep ~ x+y|loc, data=dd, out1=rep)
-  desplot(rep ~ x+y|loc, data=dd, out1=rep, out2=y)
-  desplot(rep ~ x+y|loc, data=dd, out1=rep, flip=TRUE)
-  desplot(rep ~ x+y|loc, data=dd, tick=TRUE)
-  desplot(rep ~ x+y|loc, data=dd, main="title", xlab="xlab", ylab="ylab")
-  desplot(rep ~ x+y|loc, data=dd, aspect=2)
-  dev.off()
-
-  # data(yates.oats, package="agridat") # CRAN check doesn't like 'data' here
-  oats35 <- yates.oats
-
-  desplot(yield~x+y, oats35)
-  desplot(yield~x+y|block, oats35)
-
-  # Text over continuous colors
-  desplot(yield~x+y, oats35, out1=block, text=gen, cex=1,
-          xlab="x axis", ylab="y axis", ticks=TRUE)
-
-  desplot(yield~x+y, oats35, out2=block)
-  desplot(yield~x+y, oats35, out1=block, out2=gen)
-  desplot(gen~x+y, oats35, col=block, num=nitro, cex=1, out1=block)
-
-  # Test 'at' and 'col.regions' for the ribbon
-  RedYellowBlue <-
-    colorRampPalette(c("#D73027", "#F46D43", "#FDAE61", "#FEE090", "#FFFFBF",
-                       "#E0F3F8", "#ABD9E9", "#74ADD1", "#4575B4"))
-  eightnum <- function(x) {
-    x <- x[!is.na(x)]
-    st <- grDevices::boxplot.stats(x)$stats
-    # eps <- .Machine$double.eps
-    eps <- 10^(log10(127.4)-6)
-    c(min(x)-eps, st[1:2], st[3]-eps, st[3]+eps, st[4:5], max(x)+eps)
-  }
-  desplot(yield~x+y, oats35, col.regions=RedYellowBlue(7))
-  desplot(yield~x+y, oats35, at=eightnum(oats35$yield))
-  desplot(yield~x+y, oats35, col.regions=RedYellowBlue(7),
-          at=eightnum(oats35$yield))
-
-  # What if the response is character?  Treat it like a factor
-  oats35$genchar <- as.character(oats35$gen)
-  desplot(gen~x+y, oats35, col=block, num=nitro, cex=1, out1=block)
-  desplot(genchar~x+y, oats35, col=block, num=nitro, cex=1, out1=block)
-
-  # Test abbreviations
-  desplot(block~x+y, oats35, col=nitro, text=gen, cex=1, shorten='abb') # default
-  desplot(block~x+y, oats35, col=nitro, text=gen, cex=1, shorten='sub')
-  desplot(block~x+y, oats35, col=nitro, text=gen, cex=1, shorten='no')
-
-  # Show actual yield values
-  desplot(block~x+y, oats35, text=yield, shorten='no')
-
-  desplot(block~x+y, oats35, col=nitro, text=gen, cex=1, out1=block)
-  desplot(block~x+y, oats35, col=nitro, text=gen, cex=1, out1=block, out2=gen)
-  desplot(block~x+y, oats35, num="gen", col="nitro", cex=1)
-
-  # Test custom labels
-  desplot(block~x+y, oats35, text="gen", col="nitro", cex=1, text.levels=c('V','G','M'))
-  desplot(nitro~x+y, oats35, text="gen", cex=.9)
-  desplot(nitro~x+y, oats35)
-  desplot(nitro~x+y|block, oats35, text="gen", cex=.9)
-
-  # No fill color at all
-  desplot(~x+y|block, oats35, text="gen", cex=1)
-  desplot(~x+y, oats35, col="gen", cex=1)
-
-  desplot(nitro~x+y|block, oats35, text="gen", cex=1)
-  desplot(block~x+y|block, oats35, col="nitro", text="gen", cex=1)
-
-  # Test cases with 1 or 2 rows or columns
-
-  # data(besag.met, package="agridat") # CRAN check doesn't like 'data' here
-  dmet <- besag.met
-
-  desplot(yield~col*row|county, dmet, out1=rep, out2=block, tick=TRUE)
-
-  # Create new data in which C1 has one row, C2 two rows
-  # C4 has one column, C5 two columns
-  dmet2 <- dmet
-  dmet2 <- subset(dmet2, !(county=="C1" & row<18))
-  dmet2 <- subset(dmet2, !(county=="C2" & row<17))
-  dmet2 <- subset(dmet2, !(county=="C4" & col<11))
-  dmet2 <- subset(dmet2, !(county=="C5" & col<10))
-
-  desplot(yield~col*row|county, dmet2, tick=TRUE)
-  desplot(yield~col*row|county, dmet2, out1=rep, out2=block, tick=TRUE)
-
-  # stop here
-
-  # Check the 'cleanup' function.  These all err (as they should)
-  desplot(yield~x+y, oats35, num=junk)
-  desplot(yield~x+y, oats35, col=junk)
-  desplot(yield~x+y, oats35, text=junk)
-  desplot(yield~x+y, oats35, out1=junk)
-  desplot(yield~x+y, oats35, out2=junk)
-
-}
