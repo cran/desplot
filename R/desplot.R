@@ -1,5 +1,5 @@
-# desplot.r
-# Time-stamp: <17 Dec 2016 21:00:05 c:/x/rpack/desplot/R/desplot.r>
+# desplot.R
+# Time-stamp: <12 Jul 2017 19:33:31 c:/x/rpack/desplot/R/desplot.R>
 # Kevin Wright
 
 # TODO: If we have 'text' and shorten='no', don't bother with the key.
@@ -80,7 +80,7 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' 
 #' @param col.regions Colors for the fill color of cells.
 #' 
-#' @param col.text Colors for text strings.
+#' @param col.text Vector of colors for text strings.
 #' 
 #' @param text.levels Character strings to use instead of default 'levels'.
 #' 
@@ -137,14 +137,9 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' if(require(agridat)){
 #' 
 #' # Show how to customize any feature.  Here: make the strips bigger.
-#' if(exists("besag.met")) { # in agridat version <= 1.12
-#'   data(besag.met)
-#'   dat <- besag.met
-#' } else {
-#'   data(besag.corn) # in agridat version >= 1.13
-#'   dat <- besag.corn
-#' }
-#' d1 <- desplot(yield ~ col*row|county, dat, main="besag.corn",
+#' data(besag.met)
+#' dat <- besag.met
+#' d1 <- desplot(yield ~ col*row|county, dat, main="besag.met",
 #'               out1=rep, out2=block, out2.gpar=list(col="white"), strip.cex=2)
 #' d1 <- update(d1, par.settings = list(layout.heights=list(strip=2)))
 #' print(d1)
@@ -607,9 +602,6 @@ prepanel.desplot <- function (x, y, subscripts, flip, ...) {
 }
 
 #' Panel Function for desplot
-#'
-#' This is a panel function for \code{desplot} which fills cells with
-#' a background color and adds outlines around blocks of cells.
 #'
 #' This is a panel function for \code{desplot} which fills cells with
 #' a background color and adds outlines around blocks of cells.
