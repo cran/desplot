@@ -1,8 +1,8 @@
 Package: desplot
 Title: Plotting Field Plans for Agricultural Experiments
-Version: 1.3
-Date: 2017-10-12
-Authors@R: person("Kevin","Wright", email="kw.stat@gmail.com", role=c("aut","cre"))
+Version: 1.4
+Date: 2018-04-02
+Authors@R: person("Kevin","Wright", email="kw.stat@gmail.com", comment=c(ORCID = "0000-0002-0617-8673"), role=c("aut","cre"))
 Type: Package
 Description: A function for plotting maps of agricultural field experiments that
     are laid out in grids.
@@ -15,8 +15,8 @@ BugReports: https://github.com/kwstat/desplot/issues
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 NeedsCompilation: no
-Packaged: 2017-10-13 02:38:18 UTC; wrightkevi
-Author: Kevin Wright [aut, cre]
+Packaged: 2018-04-03 14:08:05 UTC; wrightkevi
+Author: Kevin Wright [aut, cre] (<https://orcid.org/0000-0002-0617-8673>)
 Maintainer: Kevin Wright <kw.stat@gmail.com>
 Repository: CRAN
-Date/Publication: 2017-10-13 03:47:32 UTC
+Date/Publication: 2018-04-03 15:05:18 UTC
