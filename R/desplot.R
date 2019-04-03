@@ -1,11 +1,4 @@
 # desplot.R
-# Time-stamp: <20 Feb 2018 15:28:01 c:/x/rpack/desplot/R/desplot.R>
-
-# TODO:
-# If we have 'text' and shorten='no', don't bother with the key.
-# Use tidyeval instead ?
-
-# ----------------------------------------------------------------------------
 
 #' Function to create a Red-Gray-Blue palette
 #'
@@ -28,16 +21,28 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 
 #' Plot the layout/data of a field experiment.
 #'
-#' Note, not all lattice parameters are passed down to \code{xyplot}, but it
+#' Use this function to plot the layout of a rectangular lattice
+#' field experiment and also the observed data values.
+#' 
+#' To create the plot using lattice graphics: 
+#' 1. \code{desplot(...)}.
+#' 
+#' To create the plot using ggplot2 graphics, use one of the following:
+#' 1. \code{ggdesplot(...)}.
+#' 2. \code{desplot(..., gg=TRUE)}. 
+#' 3. \code{options(desplot.gg=TRUE); desplot(...)}. 
+#' Method 3 is useful to modify all results from existing scripts.
+#' 
+#' The lattice version is complete, mature, and robust.
+#' The ggplot2 version is incomplete.  The legend can only show colors, 
+#' and some function arguments are ignored.
+#' In general, lattice graphics are about 4-5 times faster than ggplot2 graphics.
+
+#' Not all lattice parameters are passed down to \code{xyplot}, but it
 #' is possible to make almost any change to the plot by assigning the
 #' desplot object to a variable and then edit the object by hand or use
 #' \code{update} to modify the object.  Then print it manually.  See the
 #' first example below.
-#'
-#' Ryder (1981) discusses the need to examine the layout of the
-#' experiment design, and not just the data.  This function provides a
-#' a tool for plotting the layout of a field experiment and also the
-#' observed data.
 #'
 #' Use \code{col.regions} to specify fill colors.  This can either be a vector
 #' of colors or a function that produces a vector of colors.  If the response
@@ -47,7 +52,7 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' \emph{numeric}, the cells are colored according to \code{col.regions}, and
 #' a ribbon key is placed on the right.
 #' 
-#' The default argument \code{shorten='abb'} will shorten the cell text using
+#' Use \code{shorten='abb'} (this is default) to shorten the cell text using
 #' the \code{abbreviate} function.
 #' Use \code{shorten='sub'} to use a 3-character substring.
 #' Use \code{shorten='no'} or \code{shorten=FALSE} for no shortening.
@@ -57,7 +62,8 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' To correctly outline the split-plot factor, simply concatenate the
 #' whole-plot factor and sub-plot factor together.
 #'
-#' To get a map of a field with a true aspect ratio, include 'aspect=ylen/xlen'
+#' To get a map of a field with a true aspect ratio (lattice version only), 
+#' include 'aspect=ylen/xlen'
 #' in the call, where 'ylen' is the vertical length of the field and 'xlen'
 #' is the horizontal length of the field.
 #' 
@@ -69,15 +75,35 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #'
 #' @param data A data frame.
 #' 
-#' @param num The name of the column of the data to use for plotting numbers.
+#' @param num Bare name (no quotes) of the column of the data to use 
+#' as a factor for number-coding the text in each cell.
 #' 
-#' @param col Column of the data for the color of the number shown in each cell.
+#' @param num.string String name of the column of the data to use 
+#' as a factor for number-coding the text in each cell.
 #' 
-#' @param text Column of the data to use for text labels shown in each cell.
+#' @param col Bare name (no quotes) of the column of the data to use
+#' for color-coding the text shown in each cell.
 #' 
-#' @param out1 Column of the data to use for outlining around blocks of cells.
+#' @param col.string String name of the column of the data to use
+#' for color-coding the text shown in each cell.
 #' 
-#' @param out2 Column of the data to use for outlining around blocks of cells.
+#' @param text Bare name (no quotes) of the column of the data to use 
+#' for the actual text shown in each cell.
+#' 
+#' @param text.string String name of the column of the data to use 
+#' for the actual text shown in each cell.
+#' 
+#' @param out1 Bare name (no quotes) of the column of the data to use 
+#' for first-level outlining around blocks of cells.
+#' 
+#' @param out1.string String name of the column of the data to use 
+#' for first-level outlining around blocks of cells.
+#' 
+#' @param out2 Bare name (no quotes) of the column of the data to use 
+#' for second-level outlining around blocks of cells.
+#' 
+#' @param out2.string String name of the column of the data to use 
+#' for second-level outlining around blocks of cells.
 #' 
 #' @param col.regions Colors for the fill color of cells.
 #' 
@@ -85,14 +111,14 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' 
 #' @param text.levels Character strings to use instead of default 'levels'.
 #' 
-#' @param out1.gpar A list of graphics parameters for outlining.  Can either
-#'   be an ordinary \code{list()} or A call to \code{gpar()} from the
+#' @param out1.gpar A list of graphics parameters for first-level outlining.  
+#' Can either be an ordinary \code{list()} or a call to \code{gpar()} from the
 #'   \code{grid} package.
 #' 
-#' @param out2.gpar Graphics parameters for the second level of outlining.
+#' @param out2.gpar Graphics parameters for second-level of outlining.
 #' 
 #' @param at Breakpoints for the color ribbon.  Use this instead of 'zlim'.
-#' Note: using at causes midpoint to be set to NULL.
+#' Note: using 'at' causes 'midpoint' to be set to NULL.
 #'
 #' @param midpoint Method to find midpoint of the color ribbon.
 #' One of 'midrange', 'median, or a numeric value.
@@ -119,9 +145,11 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' 
 #' @param subset An expression that evaluates to logical index vector for subsetting the data.
 #' 
+#' @param gg If TRUE, desplot() switches to ggdesplot().
+#' 
 #' @param ... Other.
 #' 
-#' @return A lattice object
+#' @return A lattice or ggplot2 object
 #' 
 #' @author Kevin Wright
 #' 
@@ -135,41 +163,32 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' @import reshape2
 #' @importFrom stats as.formula formula median
 #' @export
+#' @rdname desplot
 #' 
 #' @examples
 #' if(require(agridat)){
 #' 
 #' # Show how to customize any feature.  Here: make the strips bigger.
 #' data(besag.met)
-#' dat <- besag.met
-#' d1 <- desplot(yield ~ col*row|county, dat, main="besag.met",
+#' d1 <- desplot(yield ~ col*row|county, besag.met, main="besag.met",
 #'               out1=rep, out2=block, out2.gpar=list(col="white"), strip.cex=2)
 #' d1 <- update(d1, par.settings = list(layout.heights=list(strip=2)))
 #' print(d1)
 #' 
 #' # Show experiment layout
 #' data(yates.oats)
-#' # agridat version 1.12 used x/y here instead of col/row
-#' if(is.element("x",names(yates.oats)))
-#'   yates.oats <- transform(yates.oats, col=x, row=y)
 #' desplot(yield ~ col+row, yates.oats, out1=block, out2=gen)
 #' 
 #' desplot(block ~ col+row, yates.oats, col=nitro, text=gen, cex=1, out1=block,
 #'         out2=gen, out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
 #' 
-#'   
-#' # Example from Ryder.
-#' data(ryder.groundnut)
-#' gnut <- ryder.groundnut
-#' m1 <- lm(dry~block+gen, gnut)
-#' gnut$res <- resid(m1)
-#' # Note largest positive/negative residuals are adjacent
-#' desplot(res ~ col + row, gnut, text=gen, cex=1,
-#'         main="ryder.groundnut residuals from RCB model")
 #' }
 desplot <- function(form=formula(NULL ~ x + y), data,
-                    num=NULL, col=NULL, text=NULL,
-                    out1=NULL, out2=NULL,
+                    num=NULL, num.string=NULL,
+                    col=NULL, col.string=NULL,
+                    text=NULL, text.string=NULL,
+                    out1=NULL, out1.string=NULL,
+                    out2=NULL, out2.string=NULL,
                     col.regions=RedGrayBlue, col.text=NULL, text.levels=NULL,
                     out1.gpar=list(col="black", lwd=3),
                     out2.gpar=list(col="yellow", lwd=1, lty=1),
@@ -181,9 +200,12 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                     key.cex, # left legend cex
                     cex=.4, # cell cex
                     strip.cex=.75, 
-                    subset=TRUE, ...){
+                    subset=TRUE, gg=FALSE, ...){
 
-  # based on subset() function
+  # Use data name for default title.  Do this BEFORE subset!
+  if(missing(main)) main <- deparse(substitute(data))
+
+  # subset, based on subset() function
   ix <- if (missing(subset)) 
     rep_len(TRUE, nrow(data))
   else {
@@ -194,7 +216,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     ix & !is.na(ix)
   }
   data <- data[ix, ]
-  
+  data <- droplevels(data) # In case the user called with subset(obj, ...)
   
   # Using 'at' overrides 'midpoint'
   if(!missing(at) && !is.null(midpoint))
@@ -204,35 +226,88 @@ desplot <- function(form=formula(NULL ~ x + y), data,
        ( length(at) !=  length(col.regions)+1 ) )
     stop("Length of 'at' must be 1 more than length of 'col.regions'\n")
   
-  # Use data name for default title
-  if(missing(main)) main <- deparse(substitute(data))
+  # Assume num.string contains the name/string of a column in data. 
+  # If num.string is NULL, then get its value by converting 'num' 
+  # from a bare name to a string.  We MUST do this here
+  # so that if we switch from desplot to ggdesplot, we can pass 
+  # arguments as strings.  
+  mc <- as.list(match.call())
+  
+  if(is.null(num.string)){
+    if("num" %in% names(mc)) { # user did supply argument
+      if(!is.character(mc$num) & !is.null(mc$num)) { # it is a bare name
+        num.string <- deparse(substitute(num)) # evaluate to string
+      }
+    }
+  }
+  
+  if(is.null(col.string)){
+    if("col" %in% names(mc)) {
+      if(!is.character(mc$col) & !is.null(mc$col)) {
+        col.string <- deparse(substitute(col))
+      }
+    }
+  }
+  
+  if(is.null(text.string)){
+    if("text" %in% names(mc)) {
+      if(!is.character(mc$text) & !is.null(mc$text)) {
+        text.string <- deparse(substitute(text))
+      }
+    }
+  }
 
-  # Force character, in case we forgot to quote the argument.
-  # This is non-standard evaluation.  Beware.
+  if(is.null(out1.string)){
+    if("out1" %in% names(mc)) {
+      if(!is.character(mc$out1) & !is.null(mc$out1)) {
+        out1.string <- deparse(substitute(out1))
+      }
+    }
+  }
+  
+  if(is.null(out2.string)){
+    if("out2" %in% names(mc)) {
+      if(!is.character(mc$out2) & !is.null(mc$out2)) {
+        out2.string <- deparse(substitute(out2))
+      }
+    }
+  }
+
+  if(gg | isTRUE(options()$desplot.gg)) {
+    #if (!requireNamespace("ggplot2")) 
+    #  stop("You must first install the ggplot2 package: install.packages('ggplot2')")
+    out <- ggdesplot(form=form, data=data, 
+                     num.string=num.string, col.string=col.string, 
+                     text.string=text.string, 
+                     out1.string=out1.string, out2.string=out2.string, 
+                     col.regions=col.regions, col.text=col.text,
+                     out1.gpar=out1.gpar, out2.gpar=out2.gpar,
+                     at=at, midpoint=midpoint,
+                     ticks=ticks, flip=flip, main=main, xlab=xlab, ylab=ylab,
+                     shorten=shorten, show.key=show.key,
+                     key.cex=key.cex, cex=cex, strip.cex=strip.cex,
+                     subset=subset)
+    return(out)
+  }
   
   dn <- names(data)
-  cleanup <- function(x, dn){
-    if(is.null(x)) return(x)
-
-    if(!is.character(x)) x <- deparse(x)
-    if(!is.element(x, dn))
+  checkvars <- function(x, dn){
+    if(!is.null(x) && !is.element(x, dn))
       stop("Could not find '", x,"' in the data frame.")
-    return(x)
   }
-  num.var <- cleanup(substitute(num), dn)
-  col.var <- cleanup(substitute(col), dn)
-  text.var <- cleanup(substitute(text), dn)
-  out1.var <- cleanup(substitute(out1), dn)
-  out2.var <- cleanup(substitute(out2), dn)
+  checkvars(num.string, dn)
+  checkvars(col.string, dn)
+  checkvars(text.string, dn)
+  checkvars(out1.string, dn)
+  checkvars(out2.string, dn)
 
-  has.num <- !is.null(num.var)
-  has.col <- !is.null(col.var)
-  has.text <- !is.null(text.var)
-  has.out1 <- !is.null(out1.var)
-  has.out2 <- !is.null(out2.var)
+  has.num <- !is.null(num.string)
+  has.col <- !is.null(col.string)
+  has.text <- !is.null(text.string)
+  has.out1 <- !is.null(out1.string)
+  has.out2 <- !is.null(out2.string)
   if(has.num & has.text) stop("Specify either 'num' or 'text'. Not both.")
 
-  data <- droplevels(data) # In case the user called with subset(obj, ...)
 
   # Split a formula like: resp~x*y|cond into a list of text strings called
   # resp, xy (vector like 'x' '*' 'y') , cond ('cond' could be a vector)
@@ -242,23 +317,23 @@ desplot <- function(form=formula(NULL ~ x + y), data,
              cond = names(ff$condition))
   if(length(ff$resp)==0L) ff$resp <- NULL
 
-  fill.var <- ff$resp
-  x.var <- ff$xy[1]
-  y.var <- ff$xy[3]
-  panel.var <- ff$cond[1]
+  fill.string <- ff$resp
+  x.string <- ff$xy[1]
+  y.string <- ff$xy[3]
+  panel.string <- ff$cond[1]
 
   # If ticks are requested, add axis labels
   if (missing(xlab))
-    xlab <- ifelse(ticks, x.var, "")
+    xlab <- ifelse(ticks, x.string, "")
   if (missing(ylab))
-    ylab <- ifelse(ticks, y.var, "")
+    ylab <- ifelse(ticks, y.string, "")
 
   # Determine what fills the cells: nothing, character/factor, or numeric
-  if(is.null(fill.var)) fill.type="none"
-  else if (is.factor(data[[fill.var]]))
+  if(is.null(fill.string)) fill.type="none"
+  else if (is.factor(data[[fill.string]]))
     fill.type <- "factor"
-  else if (is.character(data[[fill.var]])){
-    data[[fill.var]] <- as.factor(data[[fill.var]])
+  else if (is.character(data[[fill.string]])){
+    data[[fill.string]] <- as.factor(data[[fill.string]])
     fill.type <- "factor"
   } else {
     fill.type <- "num"
@@ -272,9 +347,9 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     form <- as.formula(paste(".const", form[[1]], deparse(form[[2]]), sep=""))
     data[['.const']] <- fill.val
   } else if(fill.type=="num"){
-    fill.val <- data[[fill.var]]
+    fill.val <- data[[fill.string]]
   } else { # character/factor
-    fill.val <- data[[fill.var]]
+    fill.val <- data[[fill.string]]
     fill.n <- nlevels(fill.val)
   }
 
@@ -373,30 +448,31 @@ desplot <- function(form=formula(NULL ~ x + y), data,
 
   # Change x/y from factor to numeric if needed.  Add missing x,y levels.
   fac2num <- function(x) as.numeric(levels(x))[x]
-  if(is.factor(data[[x.var]])) data[[x.var]] <- fac2num(data[[x.var]])
-  if(is.factor(data[[y.var]])) data[[y.var]] <- fac2num(data[[y.var]])
-  data <- .addLevels(data, x.var, y.var, panel.var)
+  if(is.factor(data[[x.string]])) data[[x.string]] <- fac2num(data[[x.string]])
+  if(is.factor(data[[y.string]])) data[[y.string]] <- fac2num(data[[y.string]])
+  data <- .addLevels(data, x.string, y.string, panel.string)
 
   # Check for multiple values
-  if(is.null(panel.var)){
-    tt <- table(data[[x.var]], data[[y.var]])
+  if(is.null(panel.string)){
+    tt <- table(data[[x.string]], data[[y.string]])
   } else {
-    tt <- table(data[[x.var]], data[[y.var]], data[[panel.var]])
+    tt <- table(data[[x.string]], data[[y.string]], data[[panel.string]])
   }
   if(any(tt>1))
     warning("There are multiple data for each x/y/panel combination")
 
-  # Calculate 'lr' rows in legend, 'lt' legend text strings
+  # lr = legend row count
+  # lt = legend text strings
   lr <- 0
   lt <- NULL
 
   if(has.out1){ # out1
     lr <- lr + 1
-    lt <- c(lt, out1.var)
+    lt <- c(lt, out1.string)
   }
   if(has.out2){ # out2
     lr <- lr + 1
-    lt <- c(lt, out2.var)
+    lt <- c(lt, out2.string)
   }
   if(has.out1 | has.out2) lr <- lr + 1 # blank line
 
@@ -407,7 +483,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
   }
 
   if(has.num) { # number
-    num.val <- factor(data[[num.var]])
+    num.val <- factor(data[[num.string]])
     lt.num <- levels(num.val)
     num.n <- length(lt.num)
     lr <- lr + 2 + num.n
@@ -415,7 +491,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
   }
 
   if(has.col) { # color
-    col.val <- factor(data[[col.var]]) # In case it is numeric
+    col.val <- factor(data[[col.string]]) # In case it is numeric
     lt.col <- levels(col.val)
     col.n <- length(lt.col)
     lr <- lr + 2 + col.n
@@ -426,7 +502,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
   }
 
   if(has.text) { # text
-    text.val <- factor(data[[text.var]]) # In case it is not a factor
+    text.val <- factor(data[[text.string]]) # In case it is not a factor
     lt.text <- levels(text.val)
     text.n <- length(lt.text)
     lr <- lr + 2 + text.n
@@ -474,21 +550,21 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                                       y = unit(.5, "npc"),
                                       gp=out1.gpar),
                        row = offset, col = 1)
-      foo <- placeGrob(foo, textGrob(label = out1.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = out1.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       offset <- offset + 1
     }
     if(has.out2){
       foo <- placeGrob(foo, linesGrob(x=c(.2,.8), y=.5, gp=out2.gpar),
                        row = offset, col = 1)
-      foo <- placeGrob(foo, textGrob(label = out2.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = out2.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       offset <- offset + 1
     }
     if(has.out1 | has.out2) offset <- offset + 1 # blank line
 
     if(fill.type=='factor') {  # fill
-      foo <- placeGrob(foo, textGrob(label = fill.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = fill.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       for(kk in 1:fill.n){
         foo <- placeGrob(foo, rectGrob(width = 0.6,
@@ -503,7 +579,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     }
 
     if(has.num) { # number
-      foo <- placeGrob(foo, textGrob(label = num.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = num.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       for(kk in 1:num.n){
         foo <- placeGrob(foo, textGrob(label = kk, gp=gpar(cex=key.cex)),
@@ -515,7 +591,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     }
 
     if(has.col) { # color
-      foo <- placeGrob(foo, textGrob(label = col.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = col.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       for(kk in 1:col.n){
         foo <- placeGrob(foo, pointsGrob(.5,.5, pch=19,
@@ -529,7 +605,7 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     }
 
     if(has.text) { # text
-      foo <- placeGrob(foo, textGrob(label = text.var, gp=gpar(cex=key.cex)),
+      foo <- placeGrob(foo, textGrob(label = text.string, gp=gpar(cex=key.cex)),
                        row = offset, col = 2)
       for(kk in 1:text.n){
         foo <- placeGrob(foo, textGrob(label = text.levels[kk],
@@ -552,29 +628,29 @@ desplot <- function(form=formula(NULL ~ x + y), data,
     cell.text <- rep("x", length=nrow(data))
   }
 
-  out1.val <- if(has.out1) data[[out1.var]] else NULL
-  out2.val <- if(has.out2) data[[out2.var]] else NULL
-
+  out1.val <- if(has.out1) data[[out1.string]] else NULL
+  out2.val <- if(has.out2) data[[out2.string]] else NULL
+  
   out <-
     levelplot(form,
-              data=data
-              , out1f=out1.val, out1g=out1.gpar
-              , out2f=out2.val, out2g=out2.gpar
-              , flip=flip
-              , col.regions=col.regions
-              , colorkey = if(fill.type=="num") TRUE else FALSE
-              , as.table=TRUE
-              , at=at
-              , legend=if(show.key) list(left=list(fun=foo)) else list()
-              , main=main
-              , xlab=xlab
-              , ylab=ylab
-              , scales=list(relation='free' # Different scales for each panel
-                  , draw=ticks # Don't draw panel axes
-                  )
-              , prepanel = prepanel.desplot
-              , panel=function(x, y, z, subscripts, groups, ...,
-                  out1f, out1g, out2f, out2g){
+              data=data,
+              out1f=out1.val, out1g=out1.gpar,
+              out2f=out2.val, out2g=out2.gpar,
+              flip=flip,
+              col.regions=col.regions,
+              colorkey = if(fill.type=="num") TRUE else FALSE,
+              as.table=TRUE,
+              at=at,
+              legend=if(show.key) list(left=list(fun=foo)) else list(),
+              main=main,
+              xlab=xlab,
+              ylab=ylab,
+              scales=list(relation='free', # Different scales for each panel
+                          draw=ticks # Don't draw panel axes
+              ),
+              prepanel = prepanel.desplot,
+              panel=function(x, y, z, subscripts, groups, ...,
+                             out1f, out1g, out2f, out2g){
                 # First fill the cells and outline
                 panel.outlinelevelplot(x, y, z, subscripts, at, ...,
                                        out1f=out1f, out1g=out1g,
@@ -681,7 +757,7 @@ panel.outlinelevelplot <- function(x, y, z, subscripts, at,
   dots=list(...)
   col.regions=dots$col.regions
   # Based on panel.levelplot
-  
+
   # parent function forces x,y to be numeric, not factors
   
   if (length(subscripts) == 0L) return()
@@ -719,53 +795,27 @@ panel.outlinelevelplot <- function(x, y, z, subscripts, at,
             width=lx[idx],
             height = ly[idy],
             default.units = "native",
-            gp = gpar(fill = zcol, lwd = 1e-05, col="transparent",
+            gp = gpar(fill = zcol, lwd = 1e-05, 
+                      col="transparent",
                       alpha = alpha.regions))
-  
-  draw.outline <- function(x, y, lab, gp) {
-    # x,y are coords, lab=grouping for outline, gp=graphics par
-    out1 <- data.frame(x=x, y=y, lab=lab, stringsAsFactors = FALSE)
-    out1 <- reshape2::melt(out1, id.var=c('x','y'))
-    # reshape melts char vector to char, reshape 2 melts to factor!
-    # both packages could be attached, hack to fix this...
-    out1$value <- as.character(out1$value)
-    
-    out1 <- reshape2::acast(out1, y~x)
-    # Careful.  The 'out' matrix is upside down from the levelplot
-    
-    # Since 'out' could be 1 row or column, surround it with NAs
-    out1 <- cbind(NA, rbind(NA, out1, NA), NA)
-    
-    # Horizontal lines above boxes
-    hor <- out1[2:nrow(out1)-1, ] != out1[2:nrow(out1), ]
-    hor <- reshape2::melt(hor)
-    hor <- hor[!(hor$value==FALSE | is.na(hor$value)),]
-    if(nrow(hor)>0) {
-      hx <- hor[,2] # reshape uses X2, reshape2 uses Var2
-      hy <- hor[,1]
-      grid.polyline(x=c(hx-.5, hx+.5), y=c(hy+.5, hy+.5),
-                    id=rep(1:length(hx), 2), default.units="native", gp=gp)
-    }
-    # Vertical lines along right side of boxes
-    vert <- out1[ , 2:ncol(out1)-1] != out1[ , 2:ncol(out1)]
-    vert <- reshape2::melt(vert)
-    vert <- vert[!(vert$value==FALSE | is.na(vert$value)),]
-    if(nrow(vert)>0) {
-      vx <- vert[,2]
-      vy <- vert[,1]
-      grid.polyline(x=c(vx+.5, vx+.5), y=c(vy-.5, vy+.5),
-                    id=rep(1:length(vx), 2), default.units="native", gp=gp)
-    }
-    
-  }
-  
+
   # Outline factor 1
-  if(!is.null(out1f))
-    draw.outline(x, y, as.character(out1f[subscripts]), out1g)
-  
+  if(!is.null(out1f) && length(unique(out1f))>1 ){
+    bb <- calc_borders(x, y, as.character(out1f[subscripts]))
+    if(nrow(bb)>0) {
+      grid.segments(x0 = bb$x, y0=bb$y, x1=bb$xend, y1=bb$yend,
+                    default.units="native", gp=out1g)
+    }
+  }
+
   # Outline factor 2
-  if(!is.null(out2f))
-    draw.outline(x, y, as.character(out2f[subscripts]), out2g)
+  if(!is.null(out2f) && length(unique(out2f))>1 ){
+    bb <- calc_borders(x, y, as.character(out2f[subscripts]))
+    if(nrow(bb)>0){
+      grid.segments(x0 = bb$x, y0=bb$y, x1=bb$xend, y1=bb$yend,
+                    default.units="native", gp=out2g)
+    }
+  }
   
   return()
 }
@@ -820,7 +870,6 @@ panel.outlinelevelplot <- function(x, y, z, subscripts, at,
 }
 
 # lel is a very simple version of lattice:::extend.limits
-# Copied here because CRAN does not like ::: anymore 
 lel <- function (lim, prop = lattice.getOption("axis.padding")$numeric) {
 
   if (lim[1] == lim[2])
@@ -830,4 +879,3 @@ lel <- function (lim, prop = lattice.getOption("axis.padding")$numeric) {
     lim + prop * d * c(-1, 1)
   }
 }
-

@@ -24,6 +24,3 @@ gnut$res <- resid(m1)
 desplot(res ~ col + row, gnut, text=gen, cex=1,
         main="ryder.groundnut residuals from RCB model")
 
-## ----session----------------------------------------------------------------------------
-sessionInfo()
-

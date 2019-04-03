@@ -16,10 +16,15 @@ dat0 <- data.frame(loc = c('loc1','loc1','loc1','loc1',
                           'Trt1','Trt2','Trt1','Trt2','Trt1','Trt2'),
                    trt2=c('Hybrid1','Hybrid1','Hybrid2','Hybrid2','Hybrid1',
                           'Hybrid2','Hybrid3','Hybrid1','Hybrid2','Hybrid3'))
+dat3 <- data.frame(
+  yield = 7:1,
+  x = c(5,  6,     1,  3,  4, 5, 5),
+  y = c(2,  3,     1,  2,  3, 1, 2),
+  loc = c("L1", "L1",   "L2", "L2", "L2", "L2", "L2"),
+  block = c("B1","B1", "B1","B1","B2","B2","B2"))
 
 require(agridat)
-data(yates.oats)
-oats35 <- yates.oats
+oats35 <- agridat::yates.oats
 
 # ----------------------------------------------------------------------------
 
@@ -64,6 +69,10 @@ test_that("out1,out2,out1.gpar,out2.gpar", {
             out1=block, out1.gpar=list(col="white",lwd=2))
     desplot(yield~col+row, oats35,
             out2=block, out2.gpar=list(col="deeppink",lwd=2))
+    desplot(yield ~ x*y|loc, dat3, out1=block, out2=block) # no outline available
+    # note, the following line gives a warning, I think because there are
+    # no combinations of L1 & B2 ???
+    # desplot(yield ~ x*y|loc, dat3, out1=block, gg=TRUE)
   })
 })
 
@@ -197,8 +206,7 @@ desplot(block~col+row|block, oats35, col="nitro", text="gen", cex=1)
 
 # Test cases with 1 or 2 rows or columns
 
-# data(besag.met, package="agridat") # CRAN check doesn't like 'data' here
-if(exists("besag.met")) dmet <- besag.met else dmet <- besag.corn
+dmet <- agridat::besag.met
 
 desplot(yield~col*row|county, dmet, out1=rep, out2=block, tick=TRUE)
 
@@ -211,6 +219,7 @@ dmet2 <- subset(dmet2, !(county=="C4" & col<11))
 dmet2 <- subset(dmet2, !(county=="C5" & col<10))
 
 desplot(yield~col*row|county, dmet2, tick=TRUE)
+# fixme
 desplot(yield~col*row|county, dmet2, out1=rep, out2=block, tick=TRUE)
 
 # Another midpoint example with strong difference between midpoint
