@@ -14,7 +14,7 @@ if(0){
 #' Borders between tiles
 #' 
 #' `geom_tileborder` draws a border between tiles of different classes.
-#' The reqired aesthetics are `aes(x,y,grp)`, where `grp` is the grouping
+#' The required aesthetics are `aes(x,y,grp)`, where `grp` is the grouping
 #' classification that separates tiles.
 #' 
 #' Note, we cannot use `aes(group)` because it groups the interaction of
@@ -76,6 +76,7 @@ StatTileBorder <-
             calc_borders(data$x, data$y, data$grp)
           })
 
+#' @importFrom reshape2 acast
 calc_borders <- function(x,y,grp){
   # x,y: coordinates for tiles in a heatmap
   # grp: class identifier for each tile

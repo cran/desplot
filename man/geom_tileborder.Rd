@@ -28,7 +28,8 @@ data. All objects will be fortified to produce a data frame. See
 
 A \code{function} will be called with a single argument,
 the plot data. The return value must be a \code{data.frame}, and
-will be used as the layer data.}
+will be used as the layer data. A \code{function} can be created
+from a \code{formula} (e.g. \code{~ head(.x, 10)}).}
 
 \item{geom}{The geometric object to use display the data}
 
@@ -56,7 +57,7 @@ to the paired geom/stat.}
 }
 \description{
 `geom_tileborder` draws a border between tiles of different classes.
-The reqired aesthetics are `aes(x,y,grp)`, where `grp` is the grouping
+The required aesthetics are `aes(x,y,grp)`, where `grp` is the grouping
 classification that separates tiles.
 }
 \details{
