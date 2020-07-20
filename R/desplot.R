@@ -1,5 +1,7 @@
 # desplot.R
 
+# ----------------------------------------------------------------------------
+
 #' Function to create a Red-Gray-Blue palette
 #'
 #' A function to create a Red-Gray-Blue palette.
@@ -71,10 +73,10 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' vr <- "yield"; vx <- "x"; vy <- "y";
 #' eval(parse(text=paste("desplot(", vr, "~", vx, "*", vy, ", data=yates.oats)")))
 #' 
-#' @param form A formula like \code{yield~x*y|location}. Note x,y are numeric.
-#'
 #' @param data A data frame.
 #' 
+#' @param form A formula like \code{yield~x*y|location}. Note x,y are numeric.
+#'
 #' @param num Bare name (no quotes) of the column of the data to use 
 #' as a factor for number-coding the text in each cell.
 #' 
@@ -164,12 +166,13 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' 
 #' @references
 #' 
-#' K. Ryder (1981). Field plans: why the biometrician finds them useful.
+#' K. Ryder (1981).
+#' Field plans: why the biometrician finds them useful.
 #' \emph{Experimental Agriculture}, 17, 243--256.
 #' 
 #' @import grid
 #' @import lattice
-#' @import reshape2
+#' @importFrom reshape2 acast melt
 #' @importFrom stats as.formula formula median
 #' @export
 #' @rdname desplot
@@ -179,20 +182,27 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' 
 #' # Show how to customize any feature.  Here: make the strips bigger.
 #' data(besag.met)
-#' d1 <- desplot(yield ~ col*row|county, besag.met, main="besag.met",
+#' d1 <- desplot(besag.met, 
+#'               yield ~ col*row|county, 
+#'               main="besag.met",
 #'               out1=rep, out2=block, out2.gpar=list(col="white"), strip.cex=2)
 #' d1 <- update(d1, par.settings = list(layout.heights=list(strip=2)))
 #' print(d1)
 #' 
 #' # Show experiment layout
 #' data(yates.oats)
-#' desplot(yield ~ col+row, yates.oats, out1=block, out2=gen)
+#' desplot(yates.oats, 
+#'         yield ~ col+row, 
+#'         out1=block, out2=gen)
 #' 
-#' desplot(block ~ col+row, yates.oats, col=nitro, text=gen, cex=1, out1=block,
+#' desplot(yates.oats, 
+#'         block ~ col+row, 
+#'         col=nitro, text=gen, cex=1, out1=block,
 #'         out2=gen, out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
 #' 
 #' }
-desplot <- function(form=formula(NULL ~ x + y), data,
+desplot <- function(data, 
+                    form=formula(NULL ~ x + y),
                     num=NULL, num.string=NULL,
                     col=NULL, col.string=NULL,
                     text=NULL, text.string=NULL,
@@ -212,8 +222,20 @@ desplot <- function(form=formula(NULL ~ x + y), data,
                     strip.cex=.75, 
                     subset=TRUE, gg=FALSE, ...){
 
-  # Use data name for default title.  Do this BEFORE subset!
-  if(missing(main)) main <- deparse(substitute(data))
+  # Would be nice to remove this code someday, maybe 2022?
+  if(class(data)=="formula") {
+    # Old style: desplot(form, data)
+    # Use data name for default title.  Do this BEFORE subset!
+    if(missing(main)) main <- deparse(substitute(form))
+    tmp <- form
+    form <- data
+    data <- tmp
+    message("Please use desplot(data,form) instead of desplot(form,data)")
+  } else {
+    # New style: desplot(data, form)
+    # Use data name for default title.  Do this BEFORE subset!
+    if(missing(main)) main <- deparse(substitute(data))
+  }
 
   # subset, based on subset() function
   ix <- if (missing(subset)) 

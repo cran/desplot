@@ -4,20 +4,12 @@ author: "Kevin Wright"
 date: "`r Sys.Date()`"
 bibliography: desplot.bib
 output:
-  rmarkdown::html_vignette: default
-  html_document:
-    highlight: tango
+  rmarkdown::html_vignette:
 vignette: >
-  % \VignetteIndexEntry{Plotting field maps with the desplot package}
-  % \VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Plotting field maps with the desplot package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
-<style type="text/css">
-body, td { font-size: 14pt; color: #000; padding:1em; }
-code, pre, #ws, #message { font-size: 12pt;
-  color: #000; background-color: #f5f5f5; }
-code {border: 1px solid #e0e0e0; padding: 0 5px;}
-pre > code { border: 0; }
-</style>
 
 # Abstract
 
@@ -41,7 +33,7 @@ data(yates.oats)
 # Older versions of agridat used x/y here instead of col/row
 if(is.element("x",names(yates.oats)))
    yates.oats <- transform(yates.oats, col=x, row=y)
-desplot(block ~ col+row, yates.oats,
+desplot(yates.oats, block ~ col+row,
         col=nitro, text=gen, cex=1, out1=block,
         out2=gen, out2.gpar=list(col = "gray50", lwd = 1, lty = 1))
 ```
@@ -57,7 +49,7 @@ data(ryder.groundnut)
 gnut <- ryder.groundnut
 m1 <- lm(dry ~ block + gen, gnut) # Standard RCB model
 gnut$res <- resid(m1)
-desplot(res ~ col + row, gnut, text=gen, cex=1,
+desplot(gnut, res ~ col + row, text=gen, cex=1,
         main="ryder.groundnut residuals from RCB model")
 ```
 Note the largest positive/negative residuals are adjacent to each other,
