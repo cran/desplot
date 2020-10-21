@@ -1,6 +1,6 @@
 Package: desplot
 Title: Plotting Field Plans for Agricultural Experiments
-Version: 1.7
+Version: 1.8
 Authors@R: person("Kevin","Wright", email="kw.stat@gmail.com", comment=c(ORCID = "0000-0002-0617-8673"), role=c("aut","cre"))
 Type: Package
 Description: A function for plotting maps of agricultural field experiments that
@@ -15,8 +15,8 @@ VignetteBuilder: knitr
 RoxygenNote: 7.1.1
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2020-07-19 19:29:37 UTC; wrightkevi
+Packaged: 2020-10-20 20:53:19 UTC; wrightkevi
 Author: Kevin Wright [aut, cre] (<https://orcid.org/0000-0002-0617-8673>)
 Maintainer: Kevin Wright <kw.stat@gmail.com>
 Repository: CRAN
-Date/Publication: 2020-07-20 17:00:03 UTC
+Date/Publication: 2020-10-21 05:30:03 UTC

@@ -41,7 +41,7 @@ test_that("num,col,text", {
   })
 })
 
-test_that("cleanup function checks variables", {
+test_that("function `cleanup` checks variables", {
   expect_error( desplot(oats35, yield~col+row, num=junk) )
   expect_error( desplot(oats35, yield~col+row, col=junk) )
   expect_error( desplot(oats35, yield~col+row, text=junk) )
@@ -78,7 +78,8 @@ test_that("out1,out2,out1.gpar,out2.gpar", {
 })
 
 test_that("dq", {
-  desplot(oats35, yield~col+row, out1=block, dq=dq)
+  desplot(oats35, block~col+row, out1=block, dq=dq)
+  desplot(oats35, block~col+row|block, out1=block, dq=dq)
 })
 
 test_that("strip.cex", {
@@ -260,3 +261,4 @@ if(FALSE){
 test_that("ggdesplot", {
   ggdesplot(oats35, ~ col+row|block, cex=1, num=gen)
 } )
+
