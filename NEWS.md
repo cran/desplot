@@ -1,3 +1,8 @@
+# desplot 1.9
+
+* Tweaks to `ggdesplot` output.
+* Remove LazyData from DESCRIPTION.
+
 # desplot 1.8
 
 * Bug fix for `dq` with multiple panels.
