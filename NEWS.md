@@ -1,9 +1,15 @@
-# desplot 1.9
+# desplot 1.10 - Mar 2023
+
+* One-row panels no longer have whitespace. Issue #9.
+* Replace `aes_string(x=x.string)` with `aes(x=.data[[x.string]])` etc.
+
+# desplot 1.9 - Oct 2021
 
 * Tweaks to `ggdesplot` output.
 * Remove LazyData from DESCRIPTION.
 
-# desplot 1.8
+
+# desplot 1.8 - Oct 2020
 
 * Bug fix for `dq` with multiple panels.
 * Use `inherits` to check class #4.

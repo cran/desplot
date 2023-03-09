@@ -78,8 +78,10 @@ test_that("out1,out2,out1.gpar,out2.gpar", {
 })
 
 test_that("dq", {
-  desplot(oats35, block~col+row, out1=block, dq=dq)
-  desplot(oats35, block~col+row|block, out1=block, dq=dq)
+  expect_silent({
+    desplot(oats35, block~col+row, out1=block, dq=dq)
+    desplot(oats35, block~col+row|block, out1=block, dq=dq)
+  })
 })
 
 test_that("strip.cex", {
@@ -145,10 +147,11 @@ desplot(dat0, ~ x+y|loc,
 
 
 
-# missing values
 oats34 <- oats35
-oats34[1,'yield'] <- NA
-desplot(oats34, yield~col+row|block)
+# create a row of missing values in the field to test .addLevels
+oats34[which(oats34$row==16),'yield'] <- NA
+desplot(oats34, yield~col+row, tick=TRUE)
+desplot(oats34, yield~col+row|block, tick=TRUE)
 
 # Text over continuous colors
 desplot(oats35, yield~col+row,
@@ -254,11 +257,26 @@ if(FALSE){
 
 }
 
+# Test for issue #9. First panel has only 1 row.
+dat1row <- data.frame(
+  var = letters[1:9],
+  block = as.factor(c(1, 1, 1, 2, 2, 2,2,2,2)),
+  row = c(rep(1L,6),2,2,2),
+  col = c(1:6,4,5,6)
+)
+desplot(data = dat1row,
+        tick=TRUE,
+        form = var ~ col + row | block)
+
 # ----------------------------------------------------------------------------
 # ----------------------------------------------------------------------------
 
+
+
 # ggdesplot
 test_that("ggdesplot", {
-  ggdesplot(oats35, ~ col+row|block, cex=1, num=gen)
+  expect_silent({
+    ggdesplot(oats35, ~ col+row|block, cex=1, num=gen)
+  })
 } )
 

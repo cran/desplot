@@ -54,8 +54,8 @@ RedGrayBlue <- colorRampPalette(c("firebrick", "lightgray", "#375997"))
 #' \emph{numeric}, the cells are colored according to \code{col.regions}, and
 #' a ribbon key is placed on the right.
 #' 
-#' Use \code{shorten='abb'} (this is default) to shorten the cell text using
-#' the \code{abbreviate} function.
+#' Use \code{shorten='abb'} (this is default) to shorten the cell text to 2
+#' characters using the \code{abbreviate} function
 #' Use \code{shorten='sub'} to use a 3-character substring.
 #' Use \code{shorten='no'} or \code{shorten=FALSE} for no shortening.
 #' 
@@ -567,9 +567,11 @@ desplot <- function(data,
   if (lr==0) show.key <- FALSE
 
   # In function call we use 'list' instead of 'gpar' because gpar is not
-  # exported from grid, so now fixup the class for out1.gpar, out2.gpar
-  if(class(out1.gpar) != "gpar") class(out1.gpar) <- "gpar"
-  if(class(out2.gpar) != "gpar") class(out2.gpar) <- "gpar"
+  # exported from grid, so now change the class for out1.gpar, out2.gpar
+  #if(class(out1.gpar) != "gpar") class(out1.gpar) <- "gpar"
+  class(out1.gpar) <- "gpar"
+  #if(class(out2.gpar) != "gpar") class(out2.gpar) <- "gpar"
+  class(out2.gpar) <- "gpar"
   
   # ----- Now we can actually set up the legend grobs -----
   if(show.key) {
@@ -736,14 +738,16 @@ prepanel.desplot <- function (x, y, subscripts, flip, ...) {
 
     ux <- sort(unique(x[is.finite(x)]))
     if ((ulen <- length(ux)) < 2)
-      xlim <- ux + c(-1, 1)
+      #xlim <- ux + c(-1, 1)
+      xlim <- ux + c(-0.5, 0.5)
     else {
       diffs <- diff(as.numeric(ux))[c(1, ulen - 1)]
       xlim <- c(ux[1] - diffs[1]/2, ux[ulen] + diffs[2]/2)
     }
     uy <- sort(unique(y[is.finite(y)]))
     if ((ulen <- length(uy)) < 2)
-      ylim <- uy + c(-1, 1)
+      #ylim <- uy + c(-1, 1)
+      ylim <- uy + c(-0.5, 0.5)
     else {
       diffs <- diff(as.numeric(uy))[c(1, ulen - 1)]
       ylim <- c(uy[1] - diffs[1]/2, uy[ulen] + diffs[2]/2)
@@ -785,7 +789,7 @@ prepanel.desplot <- function (x, y, subscripts, flip, ...) {
 #' 
 #' @param z Value for filling each cell.
 #' 
-#' @param subscripts For compatability.
+#' @param subscripts For compatibility.
 #' 
 #' @param at Breakpoints for the colors.
 #' 
@@ -900,48 +904,96 @@ panel.outlinelevelplot <- function(x, y, z, subscripts, at,
   # For each loc, we want x/y coords to be complete.
   # NO: 1,2,4.  YES: 1,2,3,4.
   # Add one NA datum for each missing x and each missing y
-  # This does NOT completely fill in the grid (as needed by asreml)
+  # This does NOT completely fill in the rectangle (as needed by asreml)
 
-  # Original values
-  ox <- dat[[xvar]]
-  oy <- dat[[yvar]]
+  ## # Original values
+  ## ox <- dat[[xvar]]
+  ## oy <- dat[[yvar]]
 
-  x.is.factor <- is.factor(ox)
-  y.is.factor <- is.factor(oy)
-  if(x.is.factor | y.is.factor) stop("FIXME: x or y are factors.")
+  ## if( is.factor(ox) | is.factor(oy) )
+  ##   stop("FIXME: ", xvar, " or ", yvar, " are factors.")
+
+  ## if(is.null(locvar)) {
+  ##   loclevs <- factor("1") # hack alert
+  ## } else {
+  ##   oloc <- factor(dat[[locvar]]) # In case loc is character
+  ##   loclevs <- levels(oloc)
+  ## }
+
+  ## for(loc.i in loclevs){
+
+  ##   if(is.null(locvar)){
+  ##     ux <- sort(unique(ox))
+  ##     uy <- sort(unique(oy))
+  ##   } else {
+  ##     ux <- sort(unique(ox[oloc==loc.i]))
+  ##     uy <- sort(unique(oy[oloc==loc.i]))
+  ##   }
+  ##   # Add new rows and columns. Fill with missing data
+  ##   xnew <- setdiff(seq(from=min(ux), to=max(ux), by=1), ux)
+  ##   ynew <- setdiff(seq(from=min(uy), to=max(uy), by=1), uy)
+  ##   if(length(xnew) > 0){
+  ##     newrows <- nrow(dat) + 1:length(xnew)
+  ##     dat[newrows, xvar] <- xnew # R creates these rows
+  ##     if(!is.null(locvar))
+  ##       dat[newrows, locvar] <- rep(loc.i, length(xnew))
+  ##   }
+  ##   if(length(ynew) > 0){
+  ##     browser()
+  ##     newrows <- nrow(dat) + 1:length(ynew)
+  ##     dat[newrows, yvar] <- ynew
+  ##     if(!is.null(locvar))
+  ##       dat[newrows, locvar] <- rep(loc.i, length(ynew))
+  ##   }
+  ## }
+
+  # The old code above assumed locvar was character/factor, but still worked
+  # if locvar was numeric because R was coercing the data when assigning the
+  # locvar to the new row.  BUT, if dat was a tibble, then the coercion was
+  # not working.  The code below fixes that problem so that now locvar is
+  # allowed to be numeric.  Also slightly cleaner.
+  
+  if( is.factor(dat[[xvar]]) | is.factor(dat[[yvar]]) )
+    stop("FIXME: ", xvar, " or ", yvar, " are factors.")
 
   if(is.null(locvar)) {
-    loclevs <- factor("1") # hack alert
+    # If there is no location variable, we use "1" as the location level
+    uniquelocs <- "1"
   } else {
-    oloc <- factor(dat[[locvar]]) # In case loc is character
-    loclevs <- levels(oloc)
+    oloc <- dat[[locvar]]
+    uniquelocs <- unique( oloc )
   }
 
-  for(loc.i in loclevs){
-
+  for(loc.i in uniquelocs){
+    # Index of data rows for this loc.
     if(is.null(locvar)){
-      ux <- sort(unique(ox))
-      uy <- sort(unique(oy))
+      ix <- 1:nrow(dat)
     } else {
-      ux <- sort(unique(ox[oloc==loc.i]))
-      uy <- sort(unique(oy[oloc==loc.i]))
+      ix <- which(dat[[locvar]] == loc.i)
     }
-    # Add new rows and columns. Fill with missing data
-    xnew <- setdiff(seq(from=min(ux), to=max(ux), by=1), ux)
-    ynew <- setdiff(seq(from=min(uy), to=max(uy), by=1), uy)
-    if(length(xnew) > 0){
-      newrows <- nrow(dat) + 1:length(xnew)
-      dat[newrows, xvar] <- xnew # R creates these rows
+    
+    # Add rows with new x values that were missing.
+    ux <- unique(dat[ix, xvar])
+    newx <- setdiff(seq(from=min(ux), to=max(ux), by=1), ux)
+    n.newx <- length(newx)
+    if(n.newx > 0){
+      ix.new <- nrow(dat) + 1:n.newx
+      dat[ix.new, xvar] <- newx # R creates these rows on the fly
       if(!is.null(locvar))
-        dat[newrows, locvar] <- rep(loc.i, length(xnew))
+        dat[ix.new, locvar] <- rep(loc.i, n.newx)
     }
-    if(length(ynew) > 0){
-      newrows <- nrow(dat) + 1:length(ynew)
-      dat[newrows, yvar] <- ynew
+    # Same for y.
+    uy <- unique(dat[ix, yvar])
+    newy <- setdiff(seq(from=min(uy), to=max(uy), by=1), uy)
+    n.newy <- length(newy)
+    if(n.newy > 0){
+      ix.new <- nrow(dat) + 1:n.newy
+      dat[ix.new, yvar] <- newy
       if(!is.null(locvar))
-        dat[newrows, locvar] <- rep(loc.i, length(ynew))
+        dat[ix.new, locvar] <- rep(loc.i, n.newy)
     }
   }
+  
   return(dat)
 }
 
